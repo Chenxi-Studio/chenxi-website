@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { type FC } from "react";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { JiYuAuth } from "./routes/jiyu-auth";
 
-function App() {
-  const [count, setCount] = useState(0)
+const ProtectedRoute: FC<{ children: JSX.Element }> = ({
+  children,
+}: {
+  children: JSX.Element;
+}) => {
+  const isLogin = true;
+  return isLogin ? children : <Navigate to="/login" replace />;
+};
 
+const App: FC = () => {
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/jiyu/auth" replace />} />
+        <Route
+          path="/jiyu/auth"
+          element={
+            <ProtectedRoute>
+              <JiYuAuth />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
 
-export default App
+export default App;
