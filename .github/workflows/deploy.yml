@@ -1,0 +1,33 @@
+name: node.js deploy
+run-name: node.js deploy
+
+on: workflow_dispatch
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get latest release asset ID
+        id: latest_release
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const latestRelease = await github.repos.getLatestRelease({ owner, repo });
+            const assetId = latestRelease.data.assets[0].id;
+            return assetId; 
+
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.ACCOUNT }}
+          password: ${{ secrets.PASSPORT }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /usr/stock
+            wget -O release.tgz --header "Accept: application/octet-stream" --header "Authorization: Bearer ${{ secrets.TOKEN }}" --header "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/FavouriteTasty/stock-fe/releases/assets/${{ steps.latest_release.outputs.result }}
+            tar zxvf release.tgz
+            
+          
